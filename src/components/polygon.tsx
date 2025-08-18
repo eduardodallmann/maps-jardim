@@ -64,7 +64,7 @@ function usePolygon(props: PolygonProps) {
   });
 
   const geometryLibrary = useMapsLibrary('geometry');
-  const { setTerritorios, saveCoords } = useShowInfos();
+  const { clientIdRef, setTerritorios, saveCoords } = useShowInfos();
   const polygon = useRef(new google.maps.Polygon()).current;
   // update PolygonOptions (note the dependencies aren't properly checked
   // here, we just assume that setOptions is smart enough to not waste a
@@ -150,6 +150,7 @@ function usePolygon(props: PolygonProps) {
       saveCoords({
         sheetName: 'coords',
         territorio,
+        originId: clientIdRef.current,
         values: array.map((v) => ({
           lat: v.toJSON().lat,
           lng: v.toJSON().lng,

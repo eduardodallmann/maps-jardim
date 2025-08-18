@@ -3,6 +3,7 @@
 import { google } from 'googleapis';
 
 import { authenticate } from './auth';
+import { broadcaster } from './broadcaster';
 import { type Counter, type WriteCoordinatesParams } from './types';
 
 export async function getStreetsData() {
@@ -156,6 +157,7 @@ export async function writeCoordinates({
   sheetName,
   territorio,
   values,
+  originId,
 }: WriteCoordinatesParams) {
   const territorioColumns: Record<number, string> = {
     0: 'A',
@@ -192,4 +194,17 @@ export async function writeCoordinates({
       values: values.map(({ lat, lng }) => [`${lng},${lat}`]),
     },
   });
+
+  broadcaster.broadcast(
+    {
+      command: 'reload',
+      message: 'Página será recarregada devido a atualização',
+      reason: 'Atualização do sistema',
+      triggeredBy: 'sistema',
+      timestamp: new Date().toISOString(),
+      totalConnections: broadcaster.connectionCount,
+      originId,
+    },
+    'reload',
+  );
 }

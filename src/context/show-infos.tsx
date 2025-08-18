@@ -4,8 +4,10 @@ import {
   createContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type PropsWithChildren,
+  type RefObject,
   type SetStateAction,
 } from 'react';
 
@@ -16,6 +18,7 @@ import type {
 } from '~/infra/types';
 
 type ShowInfosContextType = {
+  clientIdRef: RefObject<string | null>;
   data: Array<Counter>;
   fullMap: Array<Coordenada>;
   territorios: Array<Array<Coordenada>>;
@@ -55,19 +58,16 @@ function estaDentroDoPoligono(
   return dentro;
 }
 
-// Função para somar os valores das ruas dentro de cada polígono
 function somarValoresPorPoligono(
   ruas: Counter[],
   poligonos: Array<Array<Coordenada>>,
 ): { [nome: string]: number } {
   const somas: { [nome: string]: number } = {};
 
-  // Iterar sobre cada polígono
   for (const nomePoligono in poligonos) {
     const poligono = poligonos[nomePoligono];
     somas[nomePoligono] = 0;
 
-    // Iterar sobre cada rua
     for (const rua of ruas) {
       if (estaDentroDoPoligono({ lat: rua.lat, lng: rua.lng }, poligono)) {
         somas[nomePoligono] += rua.value;
@@ -81,13 +81,11 @@ function somarValoresPorPoligono(
 export const ShowInfosProvider = ({
   data: dataPromise,
   fullMap: fullMapPromise,
-  territorios: territoriosPromise,
   saveCoords,
   children,
 }: PropsWithChildren<{
   data: Promise<Array<Counter>>;
   fullMap: Promise<Array<Coordenada>>;
-  territorios: Promise<Array<Array<Coordenada>>>;
   saveCoords: (coords: WriteCoordinatesParams) => Promise<void>;
 }>) => {
   const [data, setData] = useState<Array<Counter>>([]);
@@ -96,19 +94,68 @@ export const ShowInfosProvider = ({
   const [ruas, setRuas] = useState<boolean>(false);
   const [territorios, setTerritorios] = useState<Array<Array<Coordenada>>>([]);
 
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const clientIdRef = useRef<string | null>(null);
+
   const somasPorPoligono = useMemo(() => {
     return somarValoresPorPoligono(data, territorios);
   }, [data, territorios]);
 
+  function fetchTerritorios() {
+    fetch('/api/territorios')
+      .then((response) => response.json())
+      .then(setTerritorios);
+  }
+
   useEffect(() => {
     dataPromise.then(setData);
     fullMapPromise.then(setFullMap);
-    territoriosPromise.then(setTerritorios);
+    fetchTerritorios();
+  }, []);
+
+  useEffect(() => {
+    const connectSSE = () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+
+      const eventSource = new EventSource('/api/sse');
+      eventSourceRef.current = eventSource;
+
+      eventSource.onerror = () => {
+        setTimeout(() => {
+          if (eventSource.readyState === EventSource.CLOSED) {
+            connectSSE();
+          }
+        }, 3000);
+      };
+
+      eventSource.addEventListener('connected', (e) => {
+        const data = JSON.parse(e.data);
+        clientIdRef.current = data.connectionId;
+      });
+
+      eventSource.addEventListener('reload', (e) => {
+        const data = JSON.parse(e.data);
+        if (data.originId !== clientIdRef.current) {
+          fetchTerritorios();
+        }
+      });
+    };
+
+    connectSSE();
+
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+    };
   }, []);
 
   return (
     <ShowInfosContext.Provider
       value={{
+        clientIdRef,
         ruas,
         setRuas,
 

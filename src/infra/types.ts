@@ -14,4 +14,5 @@ export type WriteCoordinatesParams = {
   sheetName: string;
   territorio: number;
   values: Array<{ lat: number; lng: number }>;
+  originId: string | null;
 };
