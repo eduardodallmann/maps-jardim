@@ -16,6 +16,7 @@
     "@vercel/analytics": "^1.5.0",
     "@vis.gl/react-google-maps": "^1.5.5",
     "googleapis": "^156.0.0",
+    "ioredis": "^5.7.0",
     "next": "15.4.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

@@ -198,11 +198,10 @@ export async function writeCoordinates({
   broadcaster.broadcast(
     {
       command: 'reload',
-      message: 'Página será recarregada devido a atualização',
-      reason: 'Atualização do sistema',
+      message: 'Territórios atualizados',
+      reason: 'Coordenadas modificadas',
       triggeredBy: 'sistema',
       timestamp: new Date().toISOString(),
-      totalConnections: broadcaster.connectionCount,
       originId,
     },
     'reload',
