@@ -122,7 +122,8 @@ export const ShowInfosProvider = ({
       const eventSource = new EventSource('/api/sse');
       eventSourceRef.current = eventSource;
 
-      eventSource.onerror = () => {
+      eventSource.onerror = (e) => {
+        console.error('Error:', e);
         setTimeout(() => {
           if (eventSource.readyState === EventSource.CLOSED) {
             connectSSE();
