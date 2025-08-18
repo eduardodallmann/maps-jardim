@@ -64,7 +64,7 @@ function usePolygon(props: PolygonProps) {
   });
 
   const geometryLibrary = useMapsLibrary('geometry');
-  const { saveCoords } = useShowInfos();
+  const { setTerritorios, saveCoords } = useShowInfos();
   const polygon = useRef(new google.maps.Polygon()).current;
   // update PolygonOptions (note the dependencies aren't properly checked
   // here, we just assume that setOptions is smart enough to not waste a
@@ -154,6 +154,19 @@ function usePolygon(props: PolygonProps) {
           lat: v.toJSON().lat,
           lng: v.toJSON().lng,
         })),
+      });
+
+      setTerritorios((prev) => {
+        return prev.map((item, index) => {
+          if (index === territorio) {
+            return array.map((v) => ({
+              lat: v.toJSON().lat,
+              lng: v.toJSON().lng,
+            }));
+          }
+
+          return item;
+        });
       });
     }
   }

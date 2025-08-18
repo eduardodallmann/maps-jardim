@@ -5,39 +5,27 @@ import {
   useEffect,
   useMemo,
   useState,
-  type Dispatch,
   type PropsWithChildren,
-  type ReactNode,
   type SetStateAction,
 } from 'react';
-import { useSearchParams } from 'next/navigation';
 
 import type {
+  Coordenada,
   Counter,
-  Dianteira,
-  Divisao,
   WriteCoordinatesParams,
 } from '~/infra/types';
 
-type Coordenada = {
-  lat: number;
-  lng: number;
-};
-
-export type Version = 'old' | 'new5';
-
 type ShowInfosContextType = {
   data: Array<Counter>;
-  fullMap: Coordenada | null;
-  territorios: Array<Coordenada>;
+  fullMap: Array<Coordenada>;
+  territorios: Array<Array<Coordenada>>;
   somasPorPoligono: { [nome: number]: number };
-
-  editable: string | null;
 
   ruas: boolean;
   setRuas: (show: boolean) => void;
 
   saveCoords: (coords: WriteCoordinatesParams) => Promise<void>;
+  setTerritorios: (territorios: SetStateAction<Coordenada[][]>) => void;
 };
 
 export const ShowInfosContext = createContext({} as ShowInfosContextType);
@@ -70,7 +58,7 @@ function estaDentroDoPoligono(
 // Função para somar os valores das ruas dentro de cada polígono
 function somarValoresPorPoligono(
   ruas: Counter[],
-  poligonos: Array<Coordenada>,
+  poligonos: Array<Array<Coordenada>>,
 ): { [nome: string]: number } {
   const somas: { [nome: string]: number } = {};
 
@@ -98,16 +86,15 @@ export const ShowInfosProvider = ({
   children,
 }: PropsWithChildren<{
   data: Promise<Array<Counter>>;
-  fullMap: Promise<Coordenada>;
-  territorios: Promise<Array<Coordenada>>;
+  fullMap: Promise<Array<Coordenada>>;
+  territorios: Promise<Array<Array<Coordenada>>>;
   saveCoords: (coords: WriteCoordinatesParams) => Promise<void>;
 }>) => {
   const [data, setData] = useState<Array<Counter>>([]);
-  const [fullMap, setFullMap] = useState<Coordenada | null>(null);
+  const [fullMap, setFullMap] = useState<Array<Coordenada>>([]);
 
   const [ruas, setRuas] = useState<boolean>(false);
-  const [territorios, setTerritorios] = useState<Array<Coordenada>>([]);
-  const params = useSearchParams();
+  const [territorios, setTerritorios] = useState<Array<Array<Coordenada>>>([]);
 
   const somasPorPoligono = useMemo(() => {
     return somarValoresPorPoligono(data, territorios);
@@ -131,9 +118,8 @@ export const ShowInfosProvider = ({
 
         somasPorPoligono,
 
-        editable: params.get('editable'),
-
         saveCoords,
+        setTerritorios,
       }}
     >
       {children}

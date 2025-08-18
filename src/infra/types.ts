@@ -5,6 +5,11 @@ export type Counter = {
   lng: number;
 };
 
+export type Coordenada = {
+  lat: number;
+  lng: number;
+};
+
 export type WriteCoordinatesParams = {
   sheetName: string;
   territorio: number;

@@ -157,7 +157,7 @@ export async function writeCoordinates({
   territorio,
   values,
 }: WriteCoordinatesParams) {
-  const territorioColumns: any = {
+  const territorioColumns: Record<number, string> = {
     0: 'A',
     1: 'B',
     2: 'C',
