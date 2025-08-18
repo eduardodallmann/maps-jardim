@@ -132,11 +132,15 @@ export const ShowInfosProvider = ({
 
       eventSource.addEventListener('connected', (e) => {
         const data = JSON.parse(e.data);
+        console.info(data);
+
         clientIdRef.current = data.connectionId;
       });
 
       eventSource.addEventListener('reload', (e) => {
         const data = JSON.parse(e.data);
+        console.info(data);
+
         if (data.originId !== clientIdRef.current) {
           fetchTerritorios();
         }
