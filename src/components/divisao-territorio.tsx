@@ -53,7 +53,7 @@ export function DivisaoTerritorio() {
         return [
           <Polygon
             key={key}
-            editable
+            editable={false}
             editor="editable"
             paths={item}
             fillColor={polygonColors[key].fillColor}
