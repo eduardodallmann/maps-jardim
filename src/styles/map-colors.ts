@@ -70,4 +70,12 @@ export const polygonColors: Record<
     strokeColor: '#afb42b',
     fillColor: '#827717',
   },
+  17: {
+    strokeColor: '#5d4037',
+    fillColor: '#3e2723',
+  },
+  18: {
+    strokeColor: '#00897b',
+    fillColor: '#004d40',
+  },
 };

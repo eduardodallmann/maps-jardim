@@ -178,6 +178,8 @@ export async function writeCoordinates({
     15: 'P',
     16: 'Q',
     17: 'R',
+    18: 'S',
+    19: 'T',
   };
   const auth = await authenticate();
 
